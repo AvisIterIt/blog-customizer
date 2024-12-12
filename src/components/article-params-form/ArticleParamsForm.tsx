@@ -30,6 +30,7 @@ export const ArticleParamsForm = ({
 	};
 
 	useEffect(() => {
+		if (!isMenuOpen) return;
 		const handleClickOutside = (event: MouseEvent) => {
 			if (
 				sidebarRef.current &&
