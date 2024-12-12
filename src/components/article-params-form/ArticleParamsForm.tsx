@@ -4,29 +4,29 @@ import { Button } from 'src/ui/button';
 import { Select } from '../../ui/select/Select';
 import clsx from 'clsx';
 import { RadioGroup } from '../../ui/radio-group/RadioGroup';
-import { CustomCSSProperties } from '../../index';
+import { CSSProperties } from 'react';
 import {
 	fontSizeOptions,
 	defaultArticleState,
-	OptionType,
 	fontFamilyOptions,
 	fontColors,
 	backgroundColors,
 	contentWidthArr,
 } from '../../constants/articleProps';
 import { Separator } from '../../ui/separator/Separator';
+import { Text } from '../../ui/text/Text';
 
 import styles from './ArticleParamsForm.module.scss';
 
 export const ArticleParamsForm = ({
 	onApply,
 }: {
-	onApply: (styles: CustomCSSProperties) => void;
+	onApply: (styles: CSSProperties) => void;
 }) => {
-	const [isOpen, setIsOpen] = useState(false);
+	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	const sidebarRef = useRef<HTMLDivElement | null>(null);
 	const handleToggle = () => {
-		setIsOpen((previousState) => !previousState);
+		setIsMenuOpen((previousState) => !previousState);
 	};
 
 	useEffect(() => {
@@ -34,64 +34,32 @@ export const ArticleParamsForm = ({
 			if (
 				sidebarRef.current &&
 				!sidebarRef.current.contains(event.target as Node) &&
-				isOpen
+				isMenuOpen
 			) {
-				setIsOpen(false);
+				setIsMenuOpen(false);
 			}
 		};
 
-		document.addEventListener('mousedown', handleClickOutside);
+		if (isMenuOpen) {
+			document.addEventListener('mousedown', handleClickOutside);
+		}
+
 		return () => {
 			document.removeEventListener('mousedown', handleClickOutside);
 		};
-	}, [isOpen]);
+	}, [isMenuOpen]);
 
 	const [selectedFontFamily, setSelectedFontFamily] = useState(
-		defaultArticleState.fontFamilyOption
+		fontFamilyOptions[0]
 	);
-	const handleFontFamilyChange = (option: OptionType) => {
-		setSelectedFontFamily(option);
-	};
-
 	const [selectedFontSize, setSelectedFontSize] = useState(fontSizeOptions[0]);
-	const handleFontSizeChange = (option: OptionType) => {
-		setSelectedFontSize(option);
-	};
-
-	const [selectedColorFont, setSelectedColorFont] = useState(
-		defaultArticleState.fontColor
-	);
-	const handleColorFontChange = (option: OptionType) => {
-		setSelectedColorFont(option);
-	};
-
+	const [selectedColorFont, setSelectedColorFont] = useState(fontColors[0]);
 	const [selectedBackgroundColor, setSelectedBackgroundColor] = useState(
-		defaultArticleState.backgroundColor
+		backgroundColors[0]
 	);
-	const handleBackgroundColorChange = (option: OptionType) => {
-		setSelectedBackgroundColor(option);
-	};
-
 	const [selectedWidthContact, setSelectedWidthContact] = useState(
-		defaultArticleState.contentWidth
+		contentWidthArr[0]
 	);
-	const handleWidthContactChange = (option: OptionType) => {
-		setSelectedWidthContact(option);
-	};
-
-	const handleSubmit = (e: React.FormEvent) => {
-		e.preventDefault();
-
-		const appliedStyles: CustomCSSProperties = {
-			'--font-family': selectedFontFamily.value,
-			'--font-size': selectedFontSize.value,
-			'--font-color': selectedColorFont.value,
-			'--bg-color': selectedBackgroundColor.value,
-			'--container-width': selectedWidthContact.value,
-		};
-
-		onApply(appliedStyles);
-	};
 
 	const handleReset = () => {
 		setSelectedFontFamily(defaultArticleState.fontFamilyOption);
@@ -106,50 +74,67 @@ export const ArticleParamsForm = ({
 			'--font-color': defaultArticleState.fontColor.value,
 			'--bg-color': defaultArticleState.backgroundColor.value,
 			'--container-width': defaultArticleState.contentWidth.value,
-		});
+		} as CSSProperties);
+	};
+
+	const handleApply = (e: React.FormEvent) => {
+		e.preventDefault();
+		const styles = {
+			'--font-family': selectedFontFamily.value,
+			'--font-size': selectedFontSize.value,
+			'--font-color': selectedColorFont.value,
+			'--bg-color': selectedBackgroundColor.value,
+			'--container-width': selectedWidthContact.value,
+		} as React.CSSProperties;
+		onApply(styles);
 	};
 
 	return (
 		<>
-			<ArrowButton isOpen={isOpen} onClick={handleToggle} />
+			<ArrowButton isOpen={isMenuOpen} onClick={handleToggle} />
 			<aside
 				ref={sidebarRef}
 				className={clsx(styles.container, {
-					[styles.container_open]: isOpen,
+					[styles.container_open]: isMenuOpen,
 				})}>
-				<form className={styles.form} onSubmit={handleSubmit}>
+				<form className={styles.form} onSubmit={handleApply}>
 					<div className={styles.optionsContainer}>
-						<h2 className={styles.optionsTitle}>Задайте параметры</h2>
+						<Text
+							as={'h2'}
+							size={31}
+							weight={800}
+							children='Задайте параметры'
+						/>
 						<Select
 							selected={selectedFontFamily}
 							options={fontFamilyOptions}
-							onChange={handleFontFamilyChange}
+							onChange={(opt) => setSelectedFontFamily(opt)}
 							title='шрифт'
 						/>
 						<RadioGroup
 							options={fontSizeOptions}
 							selected={selectedFontSize}
-							onChange={handleFontSizeChange}
+							onChange={(opt) => setSelectedFontSize(opt)}
 							name='fontSize'
 							title='Размер шрифта'
 						/>
 						<Select
 							selected={selectedColorFont}
 							options={fontColors}
-							onChange={handleColorFontChange}
+							onChange={(opt) => setSelectedColorFont(opt)}
 							title='цвет шрифта'
 						/>
 						<Separator />
 						<Select
 							selected={selectedBackgroundColor}
 							options={backgroundColors}
-							onChange={handleBackgroundColorChange}
+							onChange={(opt) => setSelectedBackgroundColor(opt)}
 							title='цвет фона'
 						/>
 						<Select
 							selected={selectedWidthContact}
 							options={contentWidthArr}
-							onChange={handleWidthContactChange}
+							onChange={(opt) => setSelectedWidthContact(opt)}
 							title='ширина контента'
 						/>
 					</div>
