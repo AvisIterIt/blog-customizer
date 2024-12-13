@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { ArrowButton } from 'src/ui/arrow-button';
 import { Button } from 'src/ui/button';
 import { Select } from '../../ui/select/Select';
@@ -17,6 +17,7 @@ import { Separator } from '../../ui/separator/Separator';
 import { Text } from '../../ui/text/Text';
 
 import styles from './ArticleParamsForm.module.scss';
+import { useClose } from 'src/hooks/useClose';
 
 export const ArticleParamsForm = ({
 	onApply,
@@ -29,42 +30,31 @@ export const ArticleParamsForm = ({
 		setIsMenuOpen((previousState) => !previousState);
 	};
 
-	useEffect(() => {
-		if (!isMenuOpen) return;
-		const handleClickOutside = (event: MouseEvent) => {
-			if (
-				sidebarRef.current &&
-				!sidebarRef.current.contains(event.target as Node) &&
-				isMenuOpen
-			) {
-				setIsMenuOpen(false);
-			}
-		};
-
-		if (isMenuOpen) {
-			document.addEventListener('mousedown', handleClickOutside);
-		}
-
-		return () => {
-			document.removeEventListener('mousedown', handleClickOutside);
-		};
-	}, [isMenuOpen]);
+	useClose({
+		isOpen: isMenuOpen,
+		onClose: () => setIsMenuOpen(false),
+		rootRef: sidebarRef,
+	});
 
 	const [selectedFontFamily, setSelectedFontFamily] = useState(
-		fontFamilyOptions[0]
+		defaultArticleState.fontFamilyOption
 	);
-	const [selectedFontSize, setSelectedFontSize] = useState(fontSizeOptions[0]);
-	const [selectedColorFont, setSelectedColorFont] = useState(fontColors[0]);
+	const [selectedFontSize, setSelectedFontSize] = useState(
+		defaultArticleState.fontSizeOption
+	);
+	const [selectedColorFont, setSelectedColorFont] = useState(
+		defaultArticleState.fontColor
+	);
 	const [selectedBackgroundColor, setSelectedBackgroundColor] = useState(
-		backgroundColors[0]
+		defaultArticleState.backgroundColor
 	);
 	const [selectedWidthContact, setSelectedWidthContact] = useState(
-		contentWidthArr[0]
+		defaultArticleState.contentWidth
 	);
 
 	const handleReset = () => {
 		setSelectedFontFamily(defaultArticleState.fontFamilyOption);
-		setSelectedFontSize(fontSizeOptions[0]);
+		setSelectedFontSize(defaultArticleState.fontSizeOption);
 		setSelectedColorFont(defaultArticleState.fontColor);
 		setSelectedBackgroundColor(defaultArticleState.backgroundColor);
 		setSelectedWidthContact(defaultArticleState.contentWidth);
